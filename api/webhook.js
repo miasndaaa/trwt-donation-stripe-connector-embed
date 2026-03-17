@@ -1,10 +1,14 @@
 const Stripe = require('stripe');
+const getRawBody = require('raw-body');
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const FB_PIXEL_ID = process.env.FB_PIXEL_ID;
 const FB_CAPI_ACCESS_TOKEN = process.env.FB_CAPI_ACCESS_TOKEN;
 const FB_API_VERSION = 'v19.0';
+
+// Disable Vercel's automatic body parsing so we get the raw buffer
+module.exports.config = { api: { bodyParser: false } };
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -15,11 +19,9 @@ module.exports = async (req, res) => {
   let event;
 
   try {
-    // Vercel provides the raw body on req.body when content-type is not JSON,
-    // but for Stripe webhooks we need the raw buffer.
-    const rawBody = req.body;
+    const rawBody = await getRawBody(req);
     event = stripe.webhooks.constructEvent(
-      typeof rawBody === 'string' ? rawBody : JSON.stringify(rawBody),
+      rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
