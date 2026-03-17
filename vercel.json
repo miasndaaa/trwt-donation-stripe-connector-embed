@@ -1,7 +1,8 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/create-checkout.js", "use": "@vercel/node" }
+    { "src": "api/create-checkout.js", "use": "@vercel/node" },
+    { "src": "api/webhook.js", "use": "@vercel/node" }
   ],
   "routes": [
     {
@@ -13,6 +14,11 @@
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
       }
+    },
+    {
+      "src": "/api/webhook",
+      "dest": "/api/webhook.js",
+      "methods": ["POST"]
     }
   ]
 }
