@@ -15,10 +15,7 @@ function readRawBody(req) {
   });
 }
 
-// Disable Vercel's automatic body parsing so we get the raw stream
-module.exports.config = { api: { bodyParser: false } };
-
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -90,6 +87,10 @@ module.exports = async (req, res) => {
 
   return res.status(200).json({ received: true });
 };
+
+// Disable Vercel's automatic body parsing so we get the raw stream for Stripe signature verification
+module.exports = handler;
+module.exports.config = { api: { bodyParser: false } };
 
 async function hashSHA256(value) {
   const { createHash } = require('crypto');
