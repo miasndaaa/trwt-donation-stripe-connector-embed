@@ -1,5 +1,4 @@
 const Stripe = require('stripe');
-const getRawBody = require('raw-body');
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -7,7 +6,16 @@ const FB_PIXEL_ID = process.env.FB_PIXEL_ID;
 const FB_CAPI_ACCESS_TOKEN = process.env.FB_CAPI_ACCESS_TOKEN;
 const FB_API_VERSION = 'v19.0';
 
-// Disable Vercel's automatic body parsing so we get the raw buffer
+function readRawBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', (chunk) => chunks.push(chunk));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
+
+// Disable Vercel's automatic body parsing so we get the raw stream
 module.exports.config = { api: { bodyParser: false } };
 
 module.exports = async (req, res) => {
@@ -19,7 +27,7 @@ module.exports = async (req, res) => {
   let event;
 
   try {
-    const rawBody = await getRawBody(req);
+    const rawBody = await readRawBody(req);
     event = stripe.webhooks.constructEvent(
       rawBody,
       sig,

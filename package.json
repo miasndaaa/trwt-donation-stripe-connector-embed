@@ -2,7 +2,6 @@
   "name": "trade-travel-checkout",
   "version": "1.0.0",
   "dependencies": {
-    "raw-body": "^3.0.0",
     "stripe": "^17.0.0"
   }
 }
