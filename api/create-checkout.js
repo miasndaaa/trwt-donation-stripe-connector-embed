@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { preorderQty = 0, donationQty = 0, needsShipping = false } = req.body || {};
+    const { preorderQty = 0, donationQty = 0, needsShipping = false, couponCode } = req.body || {};
 
     const preorder = Math.max(0, Math.floor(Number(preorderQty)));
     const donation = Math.max(0, Math.floor(Number(donationQty)));
@@ -63,6 +63,25 @@ module.exports = async (req, res) => {
       line_items: lineItems,
       return_url: RETURN_URL + '?session_id={CHECKOUT_SESSION_ID}',
     };
+
+    // Apply coupon if provided, otherwise let Stripe show its own promo code field
+    if (couponCode && typeof couponCode === 'string') {
+      const promoCodes = await stripe.promotionCodes.list({
+        code: couponCode.trim(),
+        active: true,
+        limit: 1,
+      });
+
+      if (promoCodes.data.length > 0 && promoCodes.data[0].coupon.valid) {
+        sessionParams.discounts = [{ promotion_code: promoCodes.data[0].id }];
+      } else {
+        // Coupon not found — fall back to letting user enter it in Stripe's checkout
+        sessionParams.allow_promotion_codes = true;
+      }
+    } else {
+      // No coupon from cart — show Stripe's built-in promo code field as fallback
+      sessionParams.allow_promotion_codes = true;
+    }
 
     // Collect shipping address if they're ordering copies for themselves
     if (needsShipping) {

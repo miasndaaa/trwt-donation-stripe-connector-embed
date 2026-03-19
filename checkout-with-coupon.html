@@ -1,0 +1,618 @@
+<!-- Trade & Travel Book Checkout — Paste into GHL Custom Code Block (supports multiple instances) -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  .tt-checkout * { margin: 0; padding: 0; box-sizing: border-box; }
+  .tt-checkout { font-family: 'Poppins', sans-serif; color: #333; letter-spacing: -0.01em; }
+
+  /* ── Checkout Panel ── */
+  .tt-checkout .checkout-panel {
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.06); padding: 28px;
+  }
+  .tt-checkout .section-label {
+    font-size: 14px; font-weight: 600; letter-spacing: 0.3px;
+    text-transform: uppercase; color: #555; margin-bottom: 14px;
+  }
+
+  /* ── Product Table ── */
+  .tt-checkout .product-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+  .tt-checkout .product-table th {
+    font-size: 14px; font-weight: 600; color: #555; text-transform: capitalize;
+    letter-spacing: 0; padding: 0 0 10px; text-align: left; border-bottom: 1px solid #eee;
+  }
+  .tt-checkout .product-table th:nth-child(2) { text-align: center; }
+  .tt-checkout .product-table th:nth-child(3) { text-align: right; }
+  .tt-checkout .product-row td { padding: 12px 0; border-bottom: 1px solid #f3f3f3; vertical-align: middle; }
+  .tt-checkout .product-row:last-child td { border-bottom: none; }
+  .tt-checkout .item-cell { display: flex; align-items: center; gap: 10px; }
+  .tt-checkout .item-cb {
+    width: 20px; height: 20px; border-radius: 4px; border: 2px solid #ccc;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0; background: #fff;
+  }
+  .tt-checkout .item-cb.checked { background: #6b1d4a; border-color: #6b1d4a; }
+  .tt-checkout .item-cb svg { display: none; }
+  .tt-checkout .item-cb.checked svg { display: block; }
+  .tt-checkout .item-name { font-size: 16px; font-weight: 500; letter-spacing: -0.02em; }
+  .tt-checkout .qty-cell { text-align: center; }
+  .tt-checkout .qty-wrap {
+    display: inline-flex; align-items: center; background: #f7f7f7;
+    border-radius: 8px; border: 1px solid #e8e8e8; overflow: hidden;
+  }
+  .tt-checkout .qty-b {
+    width: 32px; height: 34px; background: transparent; border: none;
+    font-size: 18px; color: #6b1d4a; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tt-checkout .qty-b:hover { background: rgba(107,29,74,0.08); }
+  .tt-checkout .qty-b:disabled { color: #ccc; cursor: default; }
+  .tt-checkout .qty-i {
+    width: 40px; text-align: center; border: none; background: transparent;
+    font-size: 16px; font-weight: 600; color: #333; font-family: 'Poppins', sans-serif;
+    outline: none; -moz-appearance: textfield;
+  }
+  .tt-checkout .qty-i::-webkit-outer-spin-button, .tt-checkout .qty-i::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .tt-checkout .price-cell { text-align: right; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+  .tt-checkout .price-cell.dim { color: #bbb; }
+
+  /* ── Tier Tracker ── */
+  .tt-checkout .tier-box {
+    margin: 14px 0 18px; padding: 12px 14px;
+    background: #fdf8ee; border: 1px solid #f0e4c5; border-radius: 8px;
+  }
+  .tt-checkout .tier-box-title {
+    font-size: 13px; font-weight: 600; color: #b8941e;
+    text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 8px;
+  }
+  .tt-checkout .tu-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 15px; letter-spacing: -0.01em; transition: opacity 0.2s; }
+  .tt-checkout .tu-item .t-icon {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+  }
+  .tt-checkout .tu-item.locked .t-icon { background: #eee; color: #bbb; }
+  .tt-checkout .tu-item.unlocked .t-icon { background: #d4af37; color: #fff; }
+  .tt-checkout .tu-item .t-label { color: #999; }
+  .tt-checkout .tu-item.unlocked .t-label { color: #6b1d4a; font-weight: 600; }
+  .tt-checkout .tu-item .t-need { margin-left: auto; font-size: 13px; color: #bbb; white-space: nowrap; flex-shrink: 0; }
+  .tt-checkout .tu-item.unlocked .t-need { color: #d4af37; font-weight: 600; }
+
+  /* ── Divider ── */
+  .tt-checkout .divider { height: 1px; background: #eee; margin: 18px 0; }
+
+  /* ── Order Summary ── */
+  .tt-checkout .summary-header {
+    font-size: 14px; font-weight: 600; letter-spacing: 0.3px;
+    text-transform: capitalize; color: #555; padding-bottom: 10px;
+    border-bottom: 1px solid #eee; text-align: center;
+  }
+  .tt-checkout .s-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 16px; letter-spacing: -0.02em; border-bottom: 1px solid #f5f5f5; }
+  .tt-checkout .s-row .s-name { color: #666; }
+  .tt-checkout .s-row .s-qty { color: #999; font-size: 14px; }
+  .tt-checkout .s-row .s-price { font-weight: 600; }
+  .tt-checkout .s-row .s-discount { color: #2a8d46; font-weight: 600; }
+  .tt-checkout .s-total { display: flex; justify-content: space-between; padding: 12px 0 0; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+  .tt-checkout .s-total .t-price { color: #6b1d4a; }
+
+  /* ── Coupon Code ── */
+  .tt-checkout .coupon-section { margin-top: 14px; }
+  .tt-checkout .coupon-row {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .tt-checkout .coupon-input {
+    flex: 1; padding: 10px 14px; border: 1px solid #e8e8e8; border-radius: 8px;
+    font-size: 15px; font-family: 'Poppins', sans-serif; color: #333;
+    background: #f7f7f7; outline: none; letter-spacing: 0.02em;
+    transition: border-color 0.15s;
+  }
+  .tt-checkout .coupon-input:focus { border-color: #6b1d4a; }
+  .tt-checkout .coupon-input::placeholder { color: #bbb; }
+  .tt-checkout .coupon-apply {
+    padding: 10px 20px; border: 1px solid #6b1d4a; border-radius: 8px;
+    background: #fff; color: #6b1d4a; font-size: 14px; font-weight: 600;
+    font-family: 'Poppins', sans-serif; cursor: pointer; white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .tt-checkout .coupon-apply:hover { background: #fdf5f9; }
+  .tt-checkout .coupon-apply:disabled { color: #ccc; border-color: #e8e8e8; cursor: default; background: #fff; }
+  .tt-checkout .coupon-msg {
+    font-size: 13px; margin-top: 6px; letter-spacing: -0.01em;
+  }
+  .tt-checkout .coupon-msg.success { color: #2a8d46; }
+  .tt-checkout .coupon-msg.error { color: #d44; }
+
+  /* ── CTA Button ── */
+  .tt-checkout .cta-btn {
+    width: 100%; padding: 16px; margin-top: 18px;
+    background: #6b1d4a; border: none; border-radius: 10px;
+    color: #fff; font-size: 18px; font-weight: 600; letter-spacing: -0.01em;
+    font-family: 'Poppins', sans-serif; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s;
+  }
+  .tt-checkout .cta-btn:hover { background: #832460; box-shadow: 0 4px 15px rgba(107,29,74,0.3); }
+  .tt-checkout .cta-btn:disabled { background: #ccc; cursor: default; box-shadow: none; }
+  .tt-checkout .secure { text-align: center; font-size: 13px; color: #bbb; margin-top: 10px; }
+
+  /* ── Quick Donate Buttons ── */
+  .tt-checkout .quick-don {
+    display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px;
+  }
+  .tt-checkout .quick-don-label {
+    width: 100%; font-size: 13px; font-weight: 500; color: #999;
+    letter-spacing: 0; margin-bottom: 2px;
+  }
+  .tt-checkout .qd-btn {
+    padding: 9px 18px; border-radius: 22px; border: 1px solid #e8e4df;
+    background: #f8f6f3; font-size: 15px; font-weight: 500; color: #6b1d4a;
+    letter-spacing: -0.01em;
+    cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.15s;
+  }
+  .tt-checkout .qd-btn:hover { background: #fdf5f9; border-color: #6b1d4a; }
+  .tt-checkout .qd-btn.active { background: #6b1d4a; color: #fff; border-color: #6b1d4a; }
+
+  /* ── Embedded Stripe Checkout ── */
+  .tt-checkout .stripe-checkout-container {
+    display: none;
+    margin-top: 18px;
+    min-height: 400px;
+  }
+  .tt-checkout .stripe-checkout-container.visible {
+    display: block;
+  }
+  .tt-checkout .stripe-loading {
+    text-align: center; padding: 40px 0; color: #999; font-size: 16px;
+  }
+
+  /* ── Mobile Responsive ── */
+  @media (max-width: 600px) {
+    .tt-checkout .checkout-panel { padding: 18px 14px; }
+    .tt-checkout .product-table th:nth-child(2),
+    .tt-checkout .product-table th:nth-child(3) { font-size: 12px; }
+    .tt-checkout .item-name { font-size: 14px; }
+    .tt-checkout .qty-b { width: 28px; height: 30px; font-size: 15px; }
+    .tt-checkout .qty-i { width: 34px; font-size: 14px; }
+    .tt-checkout .price-cell { font-size: 14px; }
+    .tt-checkout .qd-btn { padding: 6px 11px; font-size: 12px; }
+    .tt-checkout .quick-don { gap: 5px; }
+    .tt-checkout .cta-btn { padding: 14px; font-size: 16px; }
+    .tt-checkout .s-total { font-size: 16px; }
+    .tt-checkout .tu-item { font-size: 13px; }
+    .tt-checkout .tu-item .t-need { font-size: 11px; }
+    .tt-checkout .coupon-input { padding: 8px 12px; font-size: 13px; }
+    .tt-checkout .coupon-apply { padding: 8px 14px; font-size: 13px; }
+  }
+
+  @media (max-width: 380px) {
+    .tt-checkout .checkout-panel { padding: 14px 10px; }
+    .tt-checkout .item-name { font-size: 13px; }
+    .tt-checkout .item-cb { width: 18px; height: 18px; }
+    .tt-checkout .qty-b { width: 26px; height: 28px; }
+    .tt-checkout .qty-i { width: 30px; font-size: 13px; }
+    .tt-checkout .qd-btn { padding: 5px 9px; font-size: 11px; }
+    .tt-checkout .s-row { font-size: 14px; }
+  }
+</style>
+
+<div class="tt-checkout">
+  <div class="checkout-panel">
+
+    <!-- Products -->
+    <div class="section-label">Select Your Items</div>
+
+    <table class="product-table">
+      <thead><tr><th>Item</th><th>Quantity</th><th>Price</th></tr></thead>
+      <tbody>
+        <tr class="product-row">
+          <td><div class="item-cell">
+            <div class="item-cb checked" data-tt="cb-pre" onclick="ttTog(this,'pre')"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="item-name">Order Your Copy</span>
+          </div></td>
+          <td class="qty-cell"><div class="qty-wrap">
+            <button class="qty-b" onclick="ttChg(this,'pre',-1)" data-tt="pre-m" disabled>&#8722;</button>
+            <input type="number" class="qty-i" data-tt="pre-q" value="1" min="0" max="999" onchange="ttInp(this,'pre')" />
+            <button class="qty-b" onclick="ttChg(this,'pre',1)">+</button>
+          </div></td>
+          <td class="price-cell" data-tt="pre-p">$29.00</td>
+        </tr>
+        <tr class="product-row">
+          <td><div class="item-cell">
+            <div class="item-cb" data-tt="cb-don" onclick="ttTog(this,'don')"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="item-name">Book Donation</span>
+          </div></td>
+          <td class="qty-cell"><div class="qty-wrap">
+            <button class="qty-b" onclick="ttChg(this,'don',-1)" data-tt="don-m" disabled>&#8722;</button>
+            <input type="number" class="qty-i" data-tt="don-q" value="0" min="0" max="999" onchange="ttInp(this,'don')" />
+            <button class="qty-b" onclick="ttChg(this,'don',1)">+</button>
+          </div></td>
+          <td class="price-cell dim" data-tt="don-p">$0.00</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="quick-don">
+      <div class="quick-don-label">Quick donate:</div>
+      <button class="qd-btn" onclick="ttQuickDon(this,10)">10 books</button>
+      <button class="qd-btn" onclick="ttQuickDon(this,20)">20 books</button>
+      <button class="qd-btn" onclick="ttQuickDon(this,100)">100 books</button>
+      <button class="qd-btn" onclick="ttQuickDon(this,500)">500 books</button>
+      <button class="qd-btn" onclick="ttQuickDon(this,1000)">1,000 books</button>
+    </div>
+
+    <div class="tier-box">
+      <div class="tier-box-title">Book Rewards</div>
+      <div class="tu-item locked" data-tt="t10"><div class="t-icon">&#10003;</div><span class="t-label">Stock Market Starter Kit</span><span class="t-need">10 books</span></div>
+      <div class="tu-item locked" data-tt="t20"><div class="t-icon">&#10003;</div><span class="t-label">Greeks &amp; Premium Options Webinar</span><span class="t-need">20 books</span></div>
+      <div class="tu-item locked" data-tt="t100"><div class="t-icon">&#10003;</div><span class="t-label">Options 101 Course</span><span class="t-need">100 books</span></div>
+      <div class="tu-item locked" data-tt="t500"><div class="t-icon">&#10003;</div><span class="t-label">Intimate Gathering of Top Sponsors</span><span class="t-need">500 books</span></div>
+      <div class="tu-item locked" data-tt="t1000"><div class="t-icon">&#10003;</div><span class="t-label">One-on-One Session with Teri Ijeoma</span><span class="t-need">1,000 books</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="summary-header">Order Summary</div>
+    <div data-tt="s-lines"></div>
+    <div class="s-total"><span>Order Total</span><span class="t-price" data-tt="t-total">$29.00</span></div>
+
+    <!-- Coupon Code -->
+    <div class="coupon-section">
+      <div class="coupon-row">
+        <input type="text" class="coupon-input" data-tt="coupon-input" placeholder="Coupon code" maxlength="50" />
+        <button class="coupon-apply" data-tt="coupon-apply" onclick="ttApplyCoupon(this)">Apply</button>
+      </div>
+      <div class="coupon-msg" data-tt="coupon-msg"></div>
+    </div>
+
+    <!-- Button to load embedded checkout -->
+    <button class="cta-btn" data-tt="cta" onclick="ttHandlePay(this)">Proceed to Payment</button>
+
+    <!-- Embedded Stripe Checkout appears here -->
+    <div class="stripe-checkout-container" data-tt="stripe-checkout-container"></div>
+
+    <div class="secure">* 100% Secure & Safe Payments — powered by Stripe *</div>
+  </div>
+</div>
+
+<script>if(!window.Stripe){var s=document.createElement('script');s.src='https://js.stripe.com/v3/';document.head.appendChild(s);}</script>
+<script>
+(function(){
+  // ═══════════════════════════════════════════════════════════
+  // CONFIG
+  // ═══════════════════════════════════════════════════════════
+  var CHECKOUT_API = 'https://project-98g1g.vercel.app/api/create-checkout';
+  var STRIPE_PK    = 'pk_live_JaXjOMulWZriKdPoyQoOgHqA';
+  // ═══════════════════════════════════════════════════════════
+
+  var stripe = null;
+  var P = 29;
+
+  // Per-instance state, keyed by root element
+  var instances = new WeakMap();
+
+  function getState(root) {
+    if (!instances.has(root)) {
+      instances.set(root, {
+        st: { pre: 1, don: 0 },
+        ac: { pre: true, don: false },
+        checkoutInstance: null
+      });
+    }
+    return instances.get(root);
+  }
+
+  function getRoot(el) {
+    return el.closest('.tt-checkout');
+  }
+
+  function q(root, key) {
+    return root.querySelector('[data-tt="' + key + '"]');
+  }
+
+  // Rewards — greedy allocation, most expensive first
+  var rewardCosts = [
+    { cost: 1000, id: 't1000', l: 'One-on-One Session with Teri Ijeoma' },
+    { cost: 500, id: 't500', l: 'Intimate Gathering of Top Sponsors' },
+    { cost: 100, id: 't100', l: 'Options 101 Course' },
+    { cost: 20, id: 't20', l: 'Greeks & Premium Options Webinar' },
+    { cost: 10, id: 't10', l: 'Stock Market Starter Kit' }
+  ];
+  var displayOrder = ['t10', 't20', 't100', 't500', 't1000'];
+  var rewardMap = {};
+  rewardCosts.forEach(function(r){ rewardMap[r.id] = r; });
+
+  function allocate(total) {
+    var rem = total, result = {};
+    rewardCosts.forEach(function(r) {
+      if (rem >= r.cost) { result[r.id] = true; rem -= r.cost; }
+      else { result[r.id] = false; }
+    });
+    return result;
+  }
+
+  function moreNeeded(total, id) {
+    for (var t = total + 1; t <= total + 2000; t++) {
+      if (allocate(t)[id]) return t - total;
+    }
+    return 9999;
+  }
+
+  function fmtNum(n) {
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function fmtMoney(n) {
+    return '$' + fmtNum(n) + '.00';
+  }
+
+  window.ttQuickDon = function(el, qty) {
+    var root = getRoot(el);
+    var s = getState(root);
+    s.st.don = qty;
+    q(root, 'don-q').value = qty;
+    if (qty > 0) { s.ac.don = true; q(root, 'cb-don').classList.add('checked'); }
+    else { s.ac.don = false; q(root, 'cb-don').classList.remove('checked'); }
+    upd(root);
+  };
+
+  window.ttTog = function(el, p) {
+    var root = getRoot(el);
+    var s = getState(root);
+    s.ac[p] = !s.ac[p];
+    q(root, 'cb-' + p).classList.toggle('checked', s.ac[p]);
+    if (!s.ac[p]) { s.st[p] = 0; q(root, p + '-q').value = 0; }
+    else if (s.st[p] === 0) { s.st[p] = 1; q(root, p + '-q').value = 1; }
+    upd(root);
+  };
+
+  window.ttChg = function(el, p, d) {
+    var root = getRoot(el);
+    var s = getState(root);
+    var v = Math.max(0, s.st[p] + d);
+    s.st[p] = v;
+    q(root, p + '-q').value = v;
+    if (v > 0 && !s.ac[p]) { s.ac[p] = true; q(root, 'cb-' + p).classList.add('checked'); }
+    if (v === 0) { s.ac[p] = false; q(root, 'cb-' + p).classList.remove('checked'); }
+    upd(root);
+  };
+
+  window.ttInp = function(el, p) {
+    var root = getRoot(el);
+    var s = getState(root);
+    var v = parseInt(q(root, p + '-q').value) || 0;
+    v = Math.max(0, v);
+    s.st[p] = v;
+    q(root, p + '-q').value = v;
+    if (v > 0 && !s.ac[p]) { s.ac[p] = true; q(root, 'cb-' + p).classList.add('checked'); }
+    if (v === 0) { s.ac[p] = false; q(root, 'cb-' + p).classList.remove('checked'); }
+    upd(root);
+  };
+
+  // Store coupon globally on window so all instances share it
+  function setCoupon(code, percent, amountOff) {
+    window.__ttCoupon = { code: code, percent: percent || null, amountOff: amountOff || null };
+  }
+  function getCoupon() {
+    return window.__ttCoupon || null;
+  }
+  function clearCoupon() {
+    window.__ttCoupon = null;
+  }
+
+  // Sync coupon UI across ALL checkout instances on the page
+  function syncCouponUI() {
+    var coupon = getCoupon();
+    document.querySelectorAll('.tt-checkout').forEach(function(r) {
+      var inp = q(r, 'coupon-input');
+      var msg = q(r, 'coupon-msg');
+      var btn = q(r, 'coupon-apply');
+      if (!inp) return;
+      if (coupon) {
+        inp.value = coupon.code;
+        inp.disabled = true;
+        btn.textContent = 'Remove';
+        msg.className = 'coupon-msg success';
+        msg.textContent = '\u2713 Coupon applied!';
+      } else {
+        inp.value = '';
+        inp.disabled = false;
+        btn.textContent = 'Apply';
+        msg.className = 'coupon-msg';
+        msg.textContent = '';
+      }
+      upd(r);
+    });
+  }
+
+  window.ttApplyCoupon = function(el) {
+    var root = getRoot(el);
+    var input = q(root, 'coupon-input');
+    var msg = q(root, 'coupon-msg');
+    var applyBtn = q(root, 'coupon-apply');
+
+    // If coupon is already applied, remove it
+    if (getCoupon()) {
+      clearCoupon();
+      syncCouponUI();
+      return;
+    }
+
+    var code = input.value.trim();
+    if (!code) {
+      msg.className = 'coupon-msg error';
+      msg.textContent = 'Please enter a coupon code.';
+      return;
+    }
+
+    applyBtn.disabled = true;
+    applyBtn.textContent = 'Checking...';
+    msg.className = 'coupon-msg';
+    msg.textContent = '';
+
+    fetch(CHECKOUT_API.replace('create-checkout', 'validate-coupon'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ couponCode: code })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.error) {
+        clearCoupon();
+        msg.className = 'coupon-msg error';
+        msg.textContent = data.error;
+        applyBtn.disabled = false;
+        applyBtn.textContent = 'Apply';
+      } else {
+        var appliedCode = data.couponCode || code.toUpperCase();
+        setCoupon(appliedCode, data.percent_off, data.amount_off);
+        syncCouponUI();
+      }
+    })
+    .catch(function() {
+      msg.className = 'coupon-msg error';
+      msg.textContent = 'Could not validate coupon. Try again.';
+      applyBtn.disabled = false;
+      applyBtn.textContent = 'Apply';
+    });
+  };
+
+  function upd(root) {
+    var s = getState(root);
+    // Sync state from DOM inputs (guards against state drift)
+    var domPre = parseInt(q(root, 'pre-q').value) || 0;
+    var domDon = parseInt(q(root, 'don-q').value) || 0;
+    if (domPre !== s.st.pre) { s.st.pre = domPre; s.ac.pre = domPre > 0; }
+    if (domDon !== s.st.don) { s.st.don = domDon; s.ac.don = domDon > 0; }
+    var pT = s.st.pre * P, dT = s.st.don * P, tot = pT + dT;
+    q(root, 'pre-p').textContent = fmtMoney(pT);
+    q(root, 'pre-p').classList.toggle('dim', s.st.pre === 0);
+    q(root, 'don-p').textContent = fmtMoney(dT);
+    q(root, 'don-p').classList.toggle('dim', s.st.don === 0);
+    q(root, 'pre-m').disabled = s.st.pre <= 0;
+    q(root, 'don-m').disabled = s.st.don <= 0;
+
+    // If checkout is open and quantities changed, destroy it and re-show button
+    if (s.checkoutInstance) {
+      s.checkoutInstance.destroy();
+      s.checkoutInstance = null;
+      var container = q(root, 'stripe-checkout-container');
+      container.innerHTML = '';
+      container.classList.remove('visible');
+      var btn = q(root, 'cta');
+      btn.style.display = '';
+      btn.disabled = false;
+      btn.textContent = 'Proceed to Payment';
+    }
+
+    root.querySelectorAll('.qd-btn').forEach(function(btn) {
+      var val = parseInt(btn.textContent.replace(/,/g, ''));
+      btn.classList.toggle('active', val === s.st.don);
+    });
+
+    var totalBooks = s.st.pre + s.st.don;
+    var alloc = allocate(totalBooks);
+
+    displayOrder.forEach(function(id) {
+      var el = q(root, id);
+      if (alloc[id]) {
+        el.className = 'tu-item unlocked';
+        el.querySelector('.t-need').textContent = 'Unlocked!';
+      } else {
+        el.className = 'tu-item locked';
+        var more = moreNeeded(totalBooks, id);
+        el.querySelector('.t-need').textContent = fmtNum(more) + ' more book' + (more !== 1 ? 's' : '');
+      }
+    });
+
+    var h = '';
+    if (s.st.pre > 0) h += '<div class="s-row"><span><span class="s-name">Order Your Copy</span> <span class="s-qty">\u00d7 ' + fmtNum(s.st.pre) + '</span></span><span class="s-price">' + fmtMoney(pT) + '</span></div>';
+    if (s.st.don > 0) h += '<div class="s-row"><span><span class="s-name">Book Donation</span> <span class="s-qty">\u00d7 ' + fmtNum(s.st.don) + '</span></span><span class="s-price">' + fmtMoney(dT) + '</span></div>';
+    displayOrder.forEach(function(id) {
+      if (alloc[id]) h += '<div class="s-row"><span class="s-name">' + rewardMap[id].l + '</span><span class="s-price" style="color:#d4af37">FREE</span></div>';
+    });
+
+    // Coupon discount in summary (read from global state)
+    var discount = 0;
+    var coupon = getCoupon();
+    if (coupon && tot > 0) {
+      if (coupon.percent) {
+        discount = Math.round(tot * coupon.percent) / 100;
+      } else if (coupon.amountOff) {
+        discount = Math.min(coupon.amountOff / 100, tot);
+      }
+      if (discount > 0) {
+        h += '<div class="s-row"><span class="s-name">Coupon (' + coupon.code + ')</span><span class="s-discount">&minus;' + fmtMoney(discount) + '</span></div>';
+      }
+    }
+
+    q(root, 's-lines').innerHTML = h;
+    q(root, 't-total').textContent = fmtMoney(tot - discount);
+    q(root, 'cta').disabled = tot === 0;
+  }
+
+  window.ttHandlePay = function(el) {
+    var root = getRoot(el);
+    var s = getState(root);
+    var curPre = parseInt(q(root, 'pre-q').value) || 0;
+    var curDon = parseInt(q(root, 'don-q').value) || 0;
+    if (curPre === 0 && curDon === 0) return;
+
+    if (!stripe) {
+      if (typeof Stripe === 'undefined') {
+        alert('Payment system is still loading. Please wait a moment and try again.');
+        return;
+      }
+      stripe = Stripe(STRIPE_PK);
+    }
+
+    var btn = q(root, 'cta');
+    var container = q(root, 'stripe-checkout-container');
+
+    btn.disabled = true;
+    btn.textContent = 'Loading checkout...';
+
+    if (s.checkoutInstance) {
+      s.checkoutInstance.destroy();
+      s.checkoutInstance = null;
+      container.innerHTML = '';
+    }
+
+    var payload = {
+      preorderQty: curPre,
+      donationQty: curDon,
+      needsShipping: curPre > 0
+    };
+    // Read coupon from global state (shared across all instances)
+    var coupon = getCoupon();
+    if (coupon) payload.couponCode = coupon.code;
+
+    fetch(CHECKOUT_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.error) throw new Error(data.error);
+      return stripe.initEmbeddedCheckout({
+        clientSecret: data.clientSecret
+      });
+    })
+    .then(function(checkout) {
+      s.checkoutInstance = checkout;
+      container.classList.add('visible');
+      checkout.mount(container);
+      btn.style.display = 'none';
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    })
+    .catch(function(err) {
+      alert(err.message);
+      btn.disabled = false;
+      btn.textContent = 'Proceed to Payment';
+    });
+  };
+
+  // Initialize all instances on the page
+  document.querySelectorAll('.tt-checkout').forEach(function(root) {
+    upd(root);
+  });
+})();
+</script>
