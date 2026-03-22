@@ -3,7 +3,7 @@ const Stripe = require('stripe');
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const UNIT_PRICE = 2900; // $29.00 in cents
-const RETURN_URL = process.env.SUCCESS_URL || 'https://book.tradeandtravel.com/ty';
+const RETURN_URL = 'https://book.tradeandtravel.com/ty';
 
 module.exports = async (req, res) => {
   // Handle CORS preflight
